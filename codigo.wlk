@@ -1,23 +1,22 @@
 object productora {
   var impuesto = 0      // Se debe cambiar cuando la productora quiera, considero que debe cambiarse desde la variable porque al hacer un
                         // impuesto(impuestoFijado) pierdo Encapsulamiento
-  var entradasVendidas = []
-  var shows = []        // Lista de todas las bandas que hicieron shows, si una misma banda hace 2 shows se debe agregar dos veces
-  
-  method impuesto(impuestoFijado) {     // A pesar de perder Encapsulamiento esta funcion la hago porque puede variar cuando la productora quiera
-    impuesto = impuestoFijado
-  }
+  var asistentes = []
+  var bandas = []        // Lista de todas las bandas que hicieron shows, si una misma banda hace 2 shows se debe agregar dos veces
+
   method precioAlPublico() = 1000 + impuesto
   method vender(entrada) {
     entradasVendidas.add(entrada)
   }
-  method gananciaTotal() = (entradasVendidas.size() * self.precioAlPublico()) - (shows.map({b => b.presupuesto()}))
+  method gananciaTotal() = (entradasVendidas.size() * self.precioAlPublico()) - (bandas.map({b => b.presupuesto()}))
   method entradasVendidas() = entradasVendidas.size()
-  method bandaMasPopular() = entradasVendidas.max({e=> })
+  // method bandaMasPopular() = entradasVendidas.max({e=> })
   method bonificarAsistentesVip() {
     Asistente.descuentoParticular(Asistente.descuentoParticular() +1)
   }
 }
+
+// Debo pensarlo como lista de asistentes 
 
 class Entrada {
   const property banda 
@@ -47,6 +46,7 @@ class Asistente {
   }
   method historialAñoPasado() = historialEntradas.filter({e => e.esDelAñoPasado()})
   method historialNombreDeBandas() = historialEntradas.map({e => e.banda().nombre()})
+  // Debo hacer acá un metodo para que cada asistente calcule cuanto gastó en cada entrada 
 }
 
 
@@ -94,3 +94,5 @@ class BandaIndie inherits Banda {
   override method gastoExtra() = 500 * cantidadInstrumentos
   override method popularidad() = 3.14 * nombre.size()
 }
+
+//Calcular las entradas que vendio una banda y hacer un map con la que calculo mas se puede
