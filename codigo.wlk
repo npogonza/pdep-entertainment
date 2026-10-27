@@ -1,44 +1,40 @@
 object productora {
-  var impuesto = 0      // Se debe cambiar cuando la productora quiera, considero que debe cambiarse desde la variable porque al hacer un
-                        // impuesto(impuestoFijado) pierdo Encapsulamiento
+  var impuesto = 0      
   var asistentes = []
-  var bandas = []        // Lista de todas las bandas que hicieron shows, si una misma banda hace 2 shows se debe agregar dos veces
+  var bandas = []       
 
   method precioAlPublico() = 1000 + impuesto
-  method vender(entrada) {
-    entradasVendidas.add(entrada)
+  method impuesto(impuestoFijado) {
+    impuesto = impuestoFijado
   }
-  method gananciaTotal() = (entradasVendidas.size() * self.precioAlPublico()) - (bandas.map({b => b.presupuesto()}))
-  method entradasVendidas() = entradasVendidas.size()
-  // method bandaMasPopular() = entradasVendidas.max({e=> })
+  method gananciaTotal() = (self.recaudacionEntradas()) - (self.costoBandas())
+  method recaudacionEntradas() = self.entradasVendidas() * self.precioAlPublico()
+  method entradasVendidas() = self.todasLasEntradas().size()
+  method todasLasEntradas() = asistentes.flatMap({a => a.historialEntradas()})
   method bonificarAsistentesVip() {
-    Asistente.descuentoParticular(Asistente.descuentoParticular() +1)
+    asistentes.forEach({a => a.abono().bonificar()})
   }
+  method costoBandas() = bandas.map({b => b.presupuesto()}).sum()
+  method entradasDeUnaBanda() = self.todasLasEntradas().map({e => e.banda()})
 }
-
-// Debo pensarlo como lista de asistentes 
 
 class Entrada {
   const property banda 
-  const fecha = dia + mes + año
-  const dia
-  const mes
-  const año
-  method esDelAñoPasado() = año == 2025
+  const property fecha                          // new Date(day = 15, month = 6, year = 2025)
+  method esDelAñoPasado() = fecha.year() == new Date().year() - 1
 }
 
 class Asistente {
-  const abono
-  const historialEntradas = []
+  const property abono
+  const property historialEntradas = []
   var dinero 
-  var property descuentoParticular
 
-  method comprar(entrada) {
+  method comprar(banda, fecha) {
   try {
   if (dinero > 0)
   {
-    productora.vender(entrada)
-    dinero -= productora.precioAlPublico() - abono.descuento()
+    const entrada = new Entrada (banda = banda, fecha = fecha)
+    dinero -= self.montoAPagar()
     historialEntradas.add(entrada)
   }
   else {throw new NoSePuedeComprarException()}
@@ -46,7 +42,7 @@ class Asistente {
   }
   method historialAñoPasado() = historialEntradas.filter({e => e.esDelAñoPasado()})
   method historialNombreDeBandas() = historialEntradas.map({e => e.banda().nombre()})
-  // Debo hacer acá un metodo para que cada asistente calcule cuanto gastó en cada entrada 
+  method montoAPagar() = productora.precioAlPublico() - abono.descuento()
 }
 
 
@@ -55,18 +51,23 @@ class NoSePuedeComprarException inherits Exception {
 }
 
 object fan {
-  method descuento(asistente) = 0
+  method descuento() = 0
+  method bonificar() {}
 }
 
-object vip {
-  method descuento(asistente) = productora.precioAlPublico() * (asistente.descuentoParticular() / 100)
+class Vip {
+  var descuentoParticular
+  method descuento() = productora.precioAlPublico() * (descuentoParticular / 100)
+  method bonificar() {
+    descuentoParticular += 1
+  }
 }
 
 class Banda {
   const property nombre
-  const canon = 1000000
-
-  method presupuesto() = canon + self.gastoExtra()
+  
+  method canon() = 1000000
+  method presupuesto() = self.canon() + self.gastoExtra()
   method gastoExtra() 
   method popularidad()
 } 
@@ -85,7 +86,7 @@ class BandaDeTrap inherits Banda {
   override method popularidad() { if (tienenHielo) {return 1000}
                                   else {return 0}
   }
-  override method presupuesto() = self.popularidad() + self.gastoExtra() 
+  override method canon() = self.popularidad() * 1000000
 }
 
 class BandaIndie inherits Banda {
@@ -95,4 +96,3 @@ class BandaIndie inherits Banda {
   override method popularidad() = 3.14 * nombre.size()
 }
 
-//Calcular las entradas que vendio una banda y hacer un map con la que calculo mas se puede
