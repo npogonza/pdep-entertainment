@@ -15,7 +15,8 @@ object productora {
     asistentes.forEach({a => a.abono().bonificar()})
   }
   method costoBandas() = bandas.map({b => b.presupuesto()}).sum()
-  method entradasDeUnaBanda() = self.todasLasEntradas().map({e => e.banda()})
+  method entradasDeUnaBanda(banda) = self.todasLasEntradas().filter({e => e.banda() == banda}).size()
+  method bandaMasPopular() = bandas.max({b => self.entradasDeUnaBanda(b)})
 }
 
 class Entrada {
