@@ -17,11 +17,12 @@ class Asistente {
   } catch error: NoSePuedeComprarException {error.message()}
   }
   method historialAnioPasado() = historialEntradas.filter({e => e.esDelAnioPasado()})
-  method historialNombreDeBandas() = historialEntradas.map({e => e.banda().nombre()})
-  method montoAPagar(entrada) = entrada.precioAlPublico() - abono.descuento()
-  method gastoTotalDeEntradas() = historialEntradas.sum({e => self.montoAPagar(e)})
+  method historialNombreDeBandas() = historialEntradas.map({e => e.banda().nombre()}).asSet()
+  method montoAPagar(entrada) = entrada.precioAlPublico() - abono.descuento(entrada)
+  method gastoTotalDeEntradas() = historialEntradas.sum({e => e.precioAlPublico()})
+  method dinero() = dinero // Por si se necesita para pruebas
 }
 
 class NoSePuedeComprarException inherits Exception {
-  override method message() = "No puede comprar entrada con saldo negativo."
+  override method message() = "No puede comprar entrada con saldo negativo o 0."
 }
